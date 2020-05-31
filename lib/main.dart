@@ -33,7 +33,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     allLessons = [];
   }
@@ -52,11 +51,15 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: Icon(Icons.add),
       ),
-      body: appBody(),
+      body: OrientationBuilder(builder: (context, orientation) {
+        return orientation == Orientation.portrait
+            ? appBodyPortrait()
+            : appBodyLandscape();
+      }),
     );
   }
 
-  appBody() {
+  appBodyPortrait() {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -153,6 +156,123 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Expanded(
+            child: Container(
+              color: Colors.grey.shade200,
+              child: ListView.builder(
+                itemBuilder: _generateListItems,
+                itemCount: allLessons.length,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  appBodyLandscape() {
+    return Container(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: EdgeInsets.only(right: 10, left: 10, top: 10),
+              child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        decoration: InputDecoration(
+                            labelText: "Lesson name",
+                            hintText: "Please input lesson name",
+                            border: OutlineInputBorder()),
+                        validator: (value) {
+                          if (value.length > 0) {
+                            return null;
+                          } else {
+                            return "Lesson Name must be full";
+                          }
+                        },
+                        onSaved: (value) {
+                          setState(() {
+                            lessonName = value;
+                            allLessons.add(
+                                Lesson(lessonName, lessonValue, lessonCredit));
+                            calculateAverage();
+                          });
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<int>(
+                                  items: lessonCreditItems(),
+                                  value: lessonCredit,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      lessonCredit = value;
+                                    });
+                                  }),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 2),
+                            margin: EdgeInsets.only(top: 5),
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.black, width: 1),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))),
+                          ),
+                          Container(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<double>(
+                                items: lessonValuesItems(),
+                                value: lessonValue,
+                                onChanged: (value) {
+                                  setState(() {
+                                    lessonValue = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 2),
+                            margin: EdgeInsets.only(top: 5),
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.black, width: 1),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              allLessons.length == 0
+                                  ? "Please add\nlesson"
+                                  : "Average\n${average.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                  fontSize: 50,
+                                  color: average > 2.0
+                                      ? Colors.green.shade600
+                                      : Colors.red.shade600),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
+          ),
+          Expanded(
+            flex: 1,
             child: Container(
               color: Colors.grey.shade200,
               child: ListView.builder(
